@@ -11,6 +11,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.os.Build;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 
 public class MainActivity extends Activity {
 
@@ -54,7 +58,19 @@ public class MainActivity extends Activity {
     public static class PlaceholderFragment extends Fragment {
 
         public PlaceholderFragment() {
+
+
         }
+
+        String[] forecastDummyList = {
+
+                "Today - Sunny - 20/15",
+                "Yesterday - Cloudy - 15/10",
+                "Tomorrow - Mist - 10/10"
+
+        };
+
+        List<String> listForecast = new ArrayList<String>(Arrays.asList(forecastDummyList));
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
