@@ -27,20 +27,30 @@ public class ForecastFragment extends Fragment {
     String address="api.openweathermap.org/data/2.5/forecast/daily";
     String city = "Kiev";
     String mode ="json";
-    String days = "7";
+    String days = "15";
     String units = "metric";
 
 
-    public ForecastFragment() {
+  public ForecastFragment() {
 
 
     }
 
+
+
+    List<String> listForecast;
     @Override
     public void onCreate(Bundle savedInstanceState )
     {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        try {
+            FetchWeatherTask();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -57,7 +67,13 @@ public class ForecastFragment extends Fragment {
        int id = item.getItemId();
        if (id==R.id.action_refresh)
        {
-           FetchWeatherTask();
+           try {
+               FetchWeatherTask();
+           } catch (ExecutionException e) {
+               e.printStackTrace();
+           } catch (InterruptedException e) {
+               e.printStackTrace();
+           }
            return  true;
 
        }
@@ -68,26 +84,24 @@ public class ForecastFragment extends Fragment {
 
 
 
-    public void FetchWeatherTask() {
+    public void FetchWeatherTask() throws ExecutionException, InterruptedException {
         Uri.Builder myUri = new Uri.Builder();
+
         myUri.scheme(protocol).encodedAuthority(address).appendQueryParameter("q",city).appendQueryParameter("mode",mode)
-                .appendQueryParameter("days",days).appendQueryParameter("units",units);
-        String url =myUri.build().toString();
+                .appendQueryParameter("cnt",days).appendQueryParameter("units",units);
+
+        String url = myUri.build().toString();
+
         BackThread inflateWeather = new BackThread();
-        inflateWeather.execute(url);
-        Log.i("String", url);
+
+        listForecast = new ArrayList<String>(Arrays.asList(inflateWeather.execute(url).get()));
+
     }
 
 
-    String[] forecastDummyList = {
 
-            "Today - Sunny - 20/15",
-            "Yesterday - Cloudy - 15/10",
-            "Tomorrow - Mist - 10/10"
 
-    };
 
-    List<String> listForecast = new ArrayList<String>(Arrays.asList(forecastDummyList));
 
     private ArrayAdapter<String> myAdapter;
 

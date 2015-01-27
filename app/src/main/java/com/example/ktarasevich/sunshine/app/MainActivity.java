@@ -27,7 +27,7 @@ public class MainActivity extends Activity {
             getFragmentManager().beginTransaction()
                     .add(R.id.container, new ForecastFragment())
                     .commit();
-            ForecastFragment fc = new ForecastFragment();
+
 
         }
     }
