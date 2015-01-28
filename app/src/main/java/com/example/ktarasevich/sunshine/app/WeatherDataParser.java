@@ -20,7 +20,10 @@ public class WeatherDataParser {
 
     public WeatherDataParser(String rawJson)
     {
-        this.rawJsonString=rawJson;
+        if (rawJson!=null) {
+            this.rawJsonString = rawJson;
+        }
+        else throw new NullPointerException();
     }
 
     public static double getMaxTemperatureForDay(String weatherJsonStr, int dayIndex) throws JSONException
@@ -71,8 +74,8 @@ public class WeatherDataParser {
      * Fortunately parsing is easy:  constructor takes the JSON string and converts it
      * into an Object hierarchy for us.
      */
-    public String[] getWeatherDataFromJson()
-            throws JSONException {
+    public String[] getWeatherDataFromJson() throws JSONException, NullPointerException
+    {
 
         // These are the names of the JSON objects that need to be extracted.
         final String OWM_LIST = "list";
@@ -128,7 +131,14 @@ catch (JSONException ex)
     Log.e(LOG_TAG,"Failed on json parsing");
     ex.printStackTrace();}
 
+        catch (NullPointerException ex)
+        {Log.e(LOG_TAG,"Failed on json parsing null pointer");
+            ex.printStackTrace();
+
+        }
+
         return null;
     }
+
 
 }

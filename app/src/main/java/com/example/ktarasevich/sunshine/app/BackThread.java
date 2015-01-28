@@ -13,12 +13,18 @@ import java.net.URL;
  class BackThread extends AsyncTask<String,Void,String[]>{
 
     @Override
-    protected String[] doInBackground(String... params) {
+    protected String[] doInBackground(String... params) throws NullPointerException {
         String url=params[0];
 
         //get raw json string as answer
         OpenWeatherData weatherData = new OpenWeatherData(url);
-        String rawAnswer = weatherData.GetRawWeather();
+        String rawAnswer = null;
+        try {
+            rawAnswer = weatherData.GetRawWeather();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         String[] answer;
 
         //parse json to get array of weather
@@ -27,10 +33,14 @@ import java.net.URL;
             answer= weatherArray.getWeatherDataFromJson();
             return  answer;
 
-        } catch (JSONException e) {
+        } catch (NullPointerException e) {
             e.printStackTrace();
 
         }
+        catch (JSONException e)
+        {e.printStackTrace();}
+
+
 
 
         return null;

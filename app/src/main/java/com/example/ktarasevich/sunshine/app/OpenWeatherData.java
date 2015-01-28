@@ -23,10 +23,11 @@ public class OpenWeatherData {
        this._url=urlQuery;
    }
 
-    public String GetRawWeather() {
+    public String GetRawWeather() throws  InterruptedException{
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
-
+        Integer tries=5;
+        InputStream inputStream=null;
         // Will contain the raw JSON response as a string.
         String forecastJsonStr = null;
 
@@ -40,34 +41,45 @@ public class OpenWeatherData {
             urlConnection.connect();
 
             // Read the input stream into a String
-            InputStream inputStream = urlConnection.getInputStream();
-            StringBuffer buffer = new StringBuffer();
+
+             do {
+                 InputStream stream = urlConnection.getInputStream();
+                 if (stream != null)
+                 {   inputStream=stream;
+                     break;
+                 }
+                 Thread.sleep(1000);
+                 tries--;
+             }
+             while (tries>0);
             if (inputStream == null) {
                 // Nothing to do.
-                forecastJsonStr = null;
+                forecastJsonStr=null;
             }
-            reader = new BufferedReader(new InputStreamReader(inputStream));
+            else {
+                StringBuffer buffer = new StringBuffer();
+                reader = new BufferedReader(new InputStreamReader(inputStream));
 
-            String line;
-            while ((line = reader.readLine()) != null) {
-                // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
-                // But it does make debugging a *lot* easier if you print out the completed
-                // buffer for debugging.
-                buffer.append(line + "\n");
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
+                    // But it does make debugging a *lot* easier if you print out the completed
+                    // buffer for debugging.
+                    buffer.append(line + "\n");
+                }
+
+                if (buffer.length() == 0) {
+                    // Stream was empty.  No point in parsing.
+                    forecastJsonStr = null;
+                }
+                forecastJsonStr = buffer.toString();
+                Log.i("WeatherApp", forecastJsonStr);
             }
-
-            if (buffer.length() == 0) {
-                // Stream was empty.  No point in parsing.
-                forecastJsonStr = null;
-            }
-            forecastJsonStr = buffer.toString();
-            Log.i("WeatherApp",forecastJsonStr);
-
         } catch (IOException e) {
-            Log.e("WeatherAPP", "Error ", e);
+            Log.e("WeatherAPP", "Error IO ", e);
             // If the code didn't successfully get the weather data, there's no point in attempting
             // to parse it.
-            forecastJsonStr = null;
+            forecastJsonStr=null;
         } finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();

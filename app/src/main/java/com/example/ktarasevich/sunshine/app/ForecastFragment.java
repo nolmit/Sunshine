@@ -1,6 +1,8 @@
 package com.example.ktarasevich.sunshine.app;
 
 import android.app.Fragment;
+import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,8 +12,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,7 +34,7 @@ public class ForecastFragment extends Fragment {
     String mode ="json";
     String days = "15";
     String units = "metric";
-
+    public final static String EXTRA_MESSAGE = "MESSAGE";
 
   public ForecastFragment() {
 
@@ -46,11 +51,13 @@ public class ForecastFragment extends Fragment {
         setHasOptionsMenu(true);
         try {
             FetchWeatherTask();
-        } catch (ExecutionException e) {
+        } catch (NullPointerException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        catch (ExecutionException e)
+        {e.printStackTrace();}
 
     }
 
@@ -69,11 +76,13 @@ public class ForecastFragment extends Fragment {
        {
            try {
                FetchWeatherTask();
-           } catch (ExecutionException e) {
+           } catch (NullPointerException e) {
                e.printStackTrace();
            } catch (InterruptedException e) {
                e.printStackTrace();
            }
+           catch (ExecutionException e)
+           {e.printStackTrace();}
            return  true;
 
        }
@@ -84,7 +93,7 @@ public class ForecastFragment extends Fragment {
 
 
 
-    public void FetchWeatherTask() throws ExecutionException, InterruptedException {
+    public void FetchWeatherTask() throws ExecutionException, InterruptedException, NullPointerException {
         Uri.Builder myUri = new Uri.Builder();
 
         myUri.scheme(protocol).encodedAuthority(address).appendQueryParameter("q",city).appendQueryParameter("mode",mode)
@@ -93,8 +102,11 @@ public class ForecastFragment extends Fragment {
         String url = myUri.build().toString();
 
         BackThread inflateWeather = new BackThread();
-
-        listForecast = new ArrayList<String>(Arrays.asList(inflateWeather.execute(url).get()));
+    try  {
+    listForecast = new ArrayList<String>(Arrays.asList(inflateWeather.execute(url).get()));
+       }
+   catch (NullPointerException e)
+    {e.printStackTrace();}
 
     }
 
@@ -106,15 +118,30 @@ public class ForecastFragment extends Fragment {
     private ArrayAdapter<String> myAdapter;
 
 
+   public AdapterView.OnItemClickListener WeatherItemClick()
+   {
+       AdapterView.OnItemClickListener listener = new AdapterView.OnItemClickListener() {
+           @Override
+           public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+               String item = ((TextView)view).getText().toString();
+               Intent openDetails = new Intent(getActivity(), DetailActivity.class);
+               openDetails.putExtra(EXTRA_MESSAGE,item);
+               startActivity(openDetails);
+           }
+       };
+               return listener;
+   }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        myAdapter=  new ArrayAdapter<String>(getActivity(), R.layout.list_item_forecast,R.id.list_item_forecast_textview,listForecast);
 
-        ListView myListView = (ListView) rootView.findViewById(R.id.listView_forecast);
-        myListView.setAdapter(myAdapter);
+    myAdapter = new ArrayAdapter<String>(getActivity(), R.layout.list_item_forecast, R.id.list_item_forecast_textview, listForecast);
+
+    final ListView myListView = (ListView) rootView.findViewById(R.id.listView_forecast);
+    myListView.setAdapter(myAdapter);
+    myListView.setOnItemClickListener(WeatherItemClick());
 
 
 
