@@ -29,8 +29,7 @@ public class DetailActivity extends Activity {
         }
         Intent intent = getIntent();
         mess = intent.getStringExtra(ForecastFragment.EXTRA_MESSAGE);
-        TextView textView = (TextView) findViewById(R.id.detailText);
-        //textView.setText(mess);
+
 
 
     }
@@ -51,7 +50,10 @@ public class DetailActivity extends Activity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            return true;
+
+            Intent openSettings = new Intent(this,SettingsActivity.class);
+            startActivity(openSettings);
+            return  true;
         }
 
         return super.onOptionsItemSelected(item);

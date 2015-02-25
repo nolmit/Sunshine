@@ -1,0 +1,25 @@
+<resources>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Strings related to Settings -->
+
+    <!-- Example General settings -->
+    <string name="pref_header_general">General</string>
+
+    <string name="pref_title_display_name">City</string>
+    <string name="pref_default_display_name">Kyiv</string>
+
+    <string name="pref_title_measurements">Measurements</string>
+    <string-array name="pref_measure_titles">
+        <item>Celcium</item>
+        <item>Fahrenhait</item>
+    </string-array>
+    <string-array name="pref_measure_values">
+        <item>metric</item>
+        <item>imperial</item>
+    </string-array>
+
+
+
+
+</resources>

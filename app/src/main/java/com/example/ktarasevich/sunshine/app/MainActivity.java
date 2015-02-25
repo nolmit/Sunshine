@@ -2,6 +2,7 @@ package com.example.ktarasevich.sunshine.app;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -49,7 +50,9 @@ public class MainActivity extends Activity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            return true;
+            Intent openSettings = new Intent(this,SettingsActivity.class);
+            startActivity(openSettings);
+            return  true;
         }
 
         return super.onOptionsItemSelected(item);

@@ -26,24 +26,6 @@ public class WeatherDataParser {
         else throw new NullPointerException();
     }
 
-    public static double getMaxTemperatureForDay(String weatherJsonStr, int dayIndex) throws JSONException
-    {
-        JSONObject json = new JSONObject(weatherJsonStr);
-        int days = json.getInt("cnt");
-        JSONArray list = json.getJSONArray("list");
-        if (dayIndex<=days)
-        {
-           JSONObject dayList = list.getJSONObject(dayIndex);
-            JSONObject temp = dayList.getJSONObject("temp");
-            Double maxTemp =temp.getDouble("max");
-            return  maxTemp;
-        }
-
-
-        return  0;
-    }
-
-
     /* The date/time conversion code is going to be moved outside the asynctask later,
      * so for convenience we're breaking it out into its own method now.
      */

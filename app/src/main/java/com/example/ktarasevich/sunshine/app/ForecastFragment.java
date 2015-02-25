@@ -3,8 +3,10 @@ package com.example.ktarasevich.sunshine.app;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -14,10 +16,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import android.preference.Preference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,20 +33,16 @@ public class ForecastFragment extends Fragment {
    // String url = "http://api.openweathermap.org/data/2.5/forecast/daily?q=kiev&cnt=7&mode=json&units=metric";
     String protocol="http";
     String address="api.openweathermap.org/data/2.5/forecast/daily";
-    String city = "Kiev";
+    String city;
     String mode ="json";
     String days = "15";
-    String units = "metric";
+    String units;
     public final static String EXTRA_MESSAGE = "MESSAGE";
+    ArrayAdapter myAdapter;
 
   public ForecastFragment() {
-
-
     }
 
-
-
-    List<String> listForecast;
     @Override
     public void onCreate(Bundle savedInstanceState )
     {
@@ -58,9 +57,7 @@ public class ForecastFragment extends Fragment {
         }
         catch (ExecutionException e)
         {e.printStackTrace();}
-
     }
-
 
   @Override
   public void onCreateOptionsMenu(Menu menu,MenuInflater menuInflater)
@@ -75,7 +72,8 @@ public class ForecastFragment extends Fragment {
        if (id==R.id.action_refresh)
        {
            try {
-               FetchWeatherTask();
+               myAdapter= UpdateAdapter(FetchWeatherTask());
+               myAdapter.notifyDataSetChanged();
            } catch (NullPointerException e) {
                e.printStackTrace();
            } catch (InterruptedException e) {
@@ -83,39 +81,41 @@ public class ForecastFragment extends Fragment {
            }
            catch (ExecutionException e)
            {e.printStackTrace();}
-           return  true;
+                return  true;
 
        }
+       if (id==R.id.action_settings)
+       {
+           Intent openSettings = new Intent(getActivity(),SettingsActivity.class);
+           startActivity(openSettings);
+            return  true;
+       }
 
-       return super.onOptionsItemSelected(item);
+            return super.onOptionsItemSelected(item);
     }
 
-
-
-
-    public void FetchWeatherTask() throws ExecutionException, InterruptedException, NullPointerException {
+    public List FetchWeatherTask() throws ExecutionException, InterruptedException, NullPointerException {
+        List listForecast=null;
         Uri.Builder myUri = new Uri.Builder();
-
-        myUri.scheme(protocol).encodedAuthority(address).appendQueryParameter("q",city).appendQueryParameter("mode",mode)
-                .appendQueryParameter("cnt",days).appendQueryParameter("units",units);
+        //get preferences
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        city = pref.getString(SettingsActivity.City,"");
+        units = pref.getString(SettingsActivity.Measure,"");
+        //build uri
+        myUri.scheme(protocol).encodedAuthority(address).appendQueryParameter("q", city).appendQueryParameter("mode", mode)
+                .appendQueryParameter("cnt", days).appendQueryParameter("units", units);
 
         String url = myUri.build().toString();
 
         BackThread inflateWeather = new BackThread();
-    try  {
-    listForecast = new ArrayList<String>(Arrays.asList(inflateWeather.execute(url).get()));
-       }
-   catch (NullPointerException e)
-    {e.printStackTrace();}
+        try {
+           listForecast = new ArrayList<String>(Arrays.asList(inflateWeather.execute(url).get()));
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
 
+        return listForecast;
     }
-
-
-
-
-
-
-    private ArrayAdapter<String> myAdapter;
 
 
    public AdapterView.OnItemClickListener WeatherItemClick()
@@ -129,24 +129,45 @@ public class ForecastFragment extends Fragment {
                startActivity(openDetails);
            }
        };
+
                return listener;
    }
+
+    public ArrayAdapter UpdateAdapter(List listForecast) throws ExecutionException, InterruptedException {
+        FetchWeatherTask();
+        ArrayAdapter<String> myAdapter=new ArrayAdapter<String>(getActivity(), R.layout.list_item_forecast, R.id.list_item_forecast_textview, listForecast);
+        return  myAdapter;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-
-    myAdapter = new ArrayAdapter<String>(getActivity(), R.layout.list_item_forecast, R.id.list_item_forecast_textview, listForecast);
-
-    final ListView myListView = (ListView) rootView.findViewById(R.id.listView_forecast);
+        try {
+            myAdapter= UpdateAdapter(FetchWeatherTask());
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+     ListView myListView = (ListView) rootView.findViewById(R.id.listView_forecast);
     myListView.setAdapter(myAdapter);
     myListView.setOnItemClickListener(WeatherItemClick());
 
-
-
         return rootView;
+    }
 
+    @Override
+    public void onStart() {
+        super.onStart();
 
+        try {
+            myAdapter= UpdateAdapter(FetchWeatherTask());
+            myAdapter.notifyDataSetChanged();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
