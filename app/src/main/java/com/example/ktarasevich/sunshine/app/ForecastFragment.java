@@ -39,6 +39,7 @@ public class ForecastFragment extends Fragment {
     String units;
     public final static String EXTRA_MESSAGE = "MESSAGE";
     ArrayAdapter myAdapter;
+    ListView myListView;
 
   public ForecastFragment() {
     }
@@ -150,7 +151,7 @@ public class ForecastFragment extends Fragment {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-     ListView myListView = (ListView) rootView.findViewById(R.id.listView_forecast);
+    myListView = (ListView) rootView.findViewById(R.id.listView_forecast);
     myListView.setAdapter(myAdapter);
     myListView.setOnItemClickListener(WeatherItemClick());
 
@@ -164,6 +165,8 @@ public class ForecastFragment extends Fragment {
         try {
             myAdapter= UpdateAdapter(FetchWeatherTask());
             myAdapter.notifyDataSetChanged();
+            myListView.setAdapter(myAdapter);
+
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
